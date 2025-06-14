@@ -4,8 +4,9 @@ import com.project.demo.logic.entity.product.Product;
 import jakarta.persistence.*;
 import java.util.List;
 
-@Entity
+
 @Table(name = "categories")
+@Entity
 public class Category {
 
     @Id
