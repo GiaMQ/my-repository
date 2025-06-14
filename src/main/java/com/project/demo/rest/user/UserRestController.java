@@ -36,15 +36,15 @@ public class UserRestController {
             HttpServletRequest request) {
 
         Pageable pageable = PageRequest.of(page-1, size);
-        Page<User> ordersPage = userRepository.findAll(pageable);
+        Page<User> usersPage = userRepository.findAll(pageable);
         Meta meta = new Meta(request.getMethod(), request.getRequestURL().toString());
-        meta.setTotalPages(ordersPage.getTotalPages());
-        meta.setTotalElements(ordersPage.getTotalElements());
-        meta.setPageNumber(ordersPage.getNumber() + 1);
-        meta.setPageSize(ordersPage.getSize());
+        meta.setTotalPages(usersPage.getTotalPages());
+        meta.setTotalElements(usersPage.getTotalElements());
+        meta.setPageNumber(usersPage.getNumber() + 1);
+        meta.setPageSize(usersPage.getSize());
 
         return new GlobalResponseHandler().handleResponse("Users retrieved successfully",
-                ordersPage.getContent(), HttpStatus.OK, meta);
+                usersPage.getContent(), HttpStatus.OK, meta);
     }
 
     @PostMapping
