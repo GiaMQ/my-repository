@@ -4,6 +4,8 @@ package com.project.demo.rest.category;
 import com.project.demo.logic.entity.category.Category;
 import com.project.demo.logic.entity.category.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,18 +33,36 @@ public class CategoryController {
         return categoryRepository.save(category);
     }
 
-    // Actualizar categoría (solo SUPER_ADMIN)
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public Category updateCategory(@PathVariable Long id, @RequestBody Category category) {
-        category.setId(id);
-        return categoryRepository.save(category);
+    public ResponseEntity<Category> updateCategory(
+            @PathVariable Long id,
+            @RequestBody Category incoming
+    ) {
+        return categoryRepository.findById(id)
+                .map(existing -> {
+                    // Sólo actualizamos description (o name si viene)
+                    if (incoming.getName() != null) {
+                        existing.setName(incoming.getName());
+                    }
+                    if (incoming.getDescription() != null) {
+                        existing.setDescription(incoming.getDescription());
+                    }
+                    Category updated = categoryRepository.save(existing);
+                    return ResponseEntity.ok(updated);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Borrar categoría (solo SUPER_ADMIN)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SUPER_ADMIN')")
-    public void deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
+        if (!categoryRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Categoría con ID " + id + " no encontrada.");
+        }
         categoryRepository.deleteById(id);
+        return ResponseEntity.ok("Categoría con ID " + id + " eliminada exitosamente.");
     }
 }
